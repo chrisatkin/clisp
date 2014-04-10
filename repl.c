@@ -5,6 +5,33 @@
 
 #include "mpc.h"
 
+long eval_operation(long x, char* operation, long y) {
+  if (strcmp(operation, "+") == 0) { return x + y; }
+  if (strcmp(operation, "-") == 0) { return x - y; }
+  if (strcmp(operation, "*") == 0) { return x * y; }
+  if (strcmp(operation, "/") == 0) { return x / y; }
+  if (strcmp(operation, "%") == 0) { return x % y; }
+  return 0;
+} 
+
+long eval(mpc_ast_t* tree) {
+  if (strstr(tree->tag, "number")) {
+    return atoi(tree->contents);
+  }
+
+  char* operation = tree->children[1]->contents;
+
+  long x = eval(tree->children[2]);
+
+  int i = 3;
+  while(strstr(tree->children[1]->tag, "expr")) {
+    x = eval_operation(x, operation, eval(tree->children[i]));
+    i++;
+  }
+
+  return x;
+}
+
 int main(int argc, char** argv) {
   // create some parers
   mpc_parser_t* Number = mpc_new("number");
@@ -21,28 +48,24 @@ int main(int argc, char** argv) {
   ",
   Number, Operator, Expression, Clisp);
 
-
   puts("clisp v0.0.1");
    
-  /* In a never ending loop */
   while (1) { 
     char* input = readline("> ");
-    
-    /* Add input to history */
+
     add_history(input);
 
-    mpc_result_t result;
-    if (mpc_parse("<stdin>", input, Clisp, &result)) {
-      mpc_ast_print(result.output);
-      mpc_ast_delete(result.output);
+    mpc_result_t r;
+    if (mpc_parse("<stdin>", input, Clisp, &r)) {
+      long result = eval(r.output);
+      printf("%li\n", result);
+      mpc_ast_delete(r.output);
     } else {
-      mpc_err_print(result.error);
-      mpc_err_delete(result.error);
+      mpc_err_print(r.error);
+      mpc_err_delete(r.error);
     }
 
-    /* Free retrived input */
-    free(input);
-    
+    free(input);    
   }
   
   mpc_cleanup(4, Number, Operator, Expression, Clisp);
