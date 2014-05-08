@@ -14,22 +14,24 @@ long eval_operation(long x, char* operation, long y) {
   return 0;
 } 
 
-long eval(mpc_ast_t* tree) {
-  if (strstr(tree->tag, "number")) {
-    return atoi(tree->contents);
+long eval(mpc_ast_t* t) {
+  // is it just a number? 
+  if (strstr(t->tag, "number")) {
+    return atoi(t->contents);
   }
-
-  char* operation = tree->children[1]->contents;
-
-  long x = eval(tree->children[2]);
+  
+  // operator always second child
+  char* op = t->children[1]->contents;
+  
+  long x = eval(t->children[2]); // not use of recursive `eval()` allows sub/nested expressions
 
   int i = 3;
-  while(strstr(tree->children[1]->tag, "expr")) {
-    x = eval_operation(x, operation, eval(tree->children[i]));
+  while (strstr(t->children[i]->tag, "expr")) {
+    x = eval_operation(x, op, eval(t->children[i]));
     i++;
   }
-
-  return x;
+  
+  return x;  
 }
 
 int main(int argc, char** argv) {
