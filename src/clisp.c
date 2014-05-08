@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 
@@ -11,6 +12,7 @@ long eval_operation(long x, char* operation, long y) {
   if (strcmp(operation, "*") == 0) { return x * y; }
   if (strcmp(operation, "/") == 0) { return x / y; }
   if (strcmp(operation, "%") == 0) { return x % y; }
+  if (strcmp(operation, "^") == 0) { return pow(x, y); }
   return 0;
 } 
 
@@ -44,7 +46,7 @@ int main(int argc, char** argv) {
   mpca_lang(MPC_LANG_DEFAULT,
   "                                                                \
     number      : /-?[0-9]+/ ;                                     \
-    operator    : '+' | '-' | '*' | '/' | '%' ;                          \
+    operator    : '+' | '-' | '*' | '/' | '%' | '^' ;                          \
     expression  : <number> | '(' <operator> <expression>+ ')' ;    \
     clisp       : /^/ <operator> <expression>+ /$/ ;               \
   ",
