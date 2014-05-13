@@ -174,6 +174,8 @@ lval* builtin_op(lval* a, char* op) {
     if (strcmp(op, "+") == 0) x->num += y->num;
     if (strcmp(op, "-") == 0) x->num -= y->num;
     if (strcmp(op, "*") == 0) x->num *= y->num;
+    if (strcmp(op, "^") == 0) x->num += pow(x->num, y->num);
+    if (strcmp(op, "%") == 0) x->num = x->num % y->num;
     if (strcmp(op, "/") == 0) {
       if (y->num == 0) {
         lval_del(x);
@@ -236,6 +238,7 @@ int main(int argc, char** argv) {
   mpc_parser_t* Number = mpc_new("number");
   mpc_parser_t* Symbol = mpc_new("symbol");
   mpc_parser_t* Sexpr = mpc_new("sexpr");
+  mpc_parser_t* Qexpr = mpc_new("qexpr");
   mpc_parser_t* Expression = mpc_new("expression");
   mpc_parser_t* Clisp = mpc_new("clisp");
 
@@ -244,10 +247,11 @@ int main(int argc, char** argv) {
     number      : /-?[0-9]+/ ;                                     \
     symbol      : '+' | '-' | '*' | '/' | '%' | '^' ;              \
     sexpr       : '(' <expression>* ')' ;                          \
-    expression  : <number> | <symbol> | <sexpr> ;                  \
+    qexpr       : '{' <expression>* '}' ;                          \
+    expression  : <number> | <symbol> | <sexpr> | <qexpr> ;        \
     clisp       : /^/ <expression>+ /$/ ;                          \
   ",
-  Number, Symbol, Sexpr, Expression, Clisp);
+  Number, Symbol, Sexpr, Qexpr, Expression, Clisp);
 
   puts("clisp v0.0.1");
    
@@ -269,6 +273,6 @@ int main(int argc, char** argv) {
     free(input);    
   }
   
-  mpc_cleanup(5, Number, Symbol, Sexpr, Expression, Clisp);
+  mpc_cleanup(6, Number, Symbol, Sexpr, Qexpr, Expression, Clisp);
   return 0;
 }
